@@ -2,9 +2,18 @@
 
 VERSION="0.0.1"
 
+[ -z "${BASH_SOURCE}" ] && BPKG_DIR="$(dirname "${0}")" || BPKG_DIR="$(dirname "${BASH_SOURCE}")"
+BPKG_DIR="$(readlink -f "${BPKG_DIR}")"
+
+
+
 if ! type -f bpkg-utils &>/dev/null; then
-  echo "error: bpkg-utils not found, aborting"
-  exit 1
+  if ! type -f "${BPKG_DIR}/bpkg-utils" &>/dev/null; then
+    echo "error: bpkg-utils not found, aborting"
+    exit 1
+  else
+    source "${BPKG_DIR}/bpkg-utils"
+  fi
 else
   source $(which bpkg-utils)
 fi

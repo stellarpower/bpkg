@@ -3,8 +3,11 @@
 VERSION="0.0.1"
 
 if ! type -f bpkg-utils &>/dev/null; then
-  echo "error: bpkg-utils not found, aborting"
-  exit 1
+  if ! type -f "${BPKG_DIR}/bpkg-utils" &>/dev/null; then
+    echo "error: bpkg-utils not found, aborting"
+    exit 1
+    source "${BPKG_DIR}/bpkg-utils"
+  else
 else
   source $(which bpkg-utils)
 fi
@@ -62,12 +65,12 @@ show_package () {
 
   local readme_len=$(echo "$readme" | wc -l | tr -d ' ')
 
-  local version=$(echo "$json" | bpkg-json -b | grep '"version"' | sed 's/.*version"\]\s*//' | tr -d '\t' | tr -d '"')
-  local author=$(echo "$json" | bpkg-json -b | grep '"author"' | sed 's/.*author"\]\s*//' | tr -d '\t' | tr -d '"')
-  local pkg_desc=$(echo "$json" | bpkg-json -b | grep '"description"' | sed 's/.*description"\]\s*//' | tr -d '\t' | tr -d '"')
-  local sources=$(echo "$json" | bpkg-json -b | grep '"scripts"' | cut -f 2 | tr -d '"' )
-  local description=$(echo "$json" | bpkg-json -b | grep '"description"')
-  local install_sh=$(echo "$json" | bpkg-json -b | grep '"install"' | sed 's/.*install"\]\s*//' | tr -d '\t' | tr -d '"')
+  local version=$(echo "$json" | "${BPKG_DIR}/bpkg-json" -b | grep '"version"' | sed 's/.*version"\]\s*//' | tr -d '\t' | tr -d '"')
+  local author=$(echo "$json" |  "${BPKG_DIR}/bpkg-json" -b | grep '"author"' | sed 's/.*author"\]\s*//' | tr -d '\t' | tr -d '"')
+  local pkg_desc=$(echo "$json" | "${BPKG_DIR}/bpkg-json" -b | grep '"description"' | sed 's/.*description"\]\s*//' | tr -d '\t' | tr -d '"')
+  local sources=$(echo "$json" | "${BPKG_DIR}/bpkg-json"-b | grep '"scripts"' | cut -f 2 | tr -d '"' )
+  local description=$(echo "$json" | "${BPKG_DIR}/bpkg-json" -b | grep '"description"')
+  local install_sh=$(echo "$json" | "${BPKG_DIR}/bpkg-json" -b | grep '"install"' | sed 's/.*install"\]\s*//' | tr -d '\t' | tr -d '"')
 
   if [ "$pkg_desc" != "" ]; then
     desc="$pkg_desc"

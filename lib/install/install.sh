@@ -1,5 +1,8 @@
 #!/bin/bash
 
+[ -z "${BASH_SOURCE}" ] && BPKG_DIR="$(dirname "${0}")" || BPKG_DIR="$(dirname "${BASH_SOURCE}")"
+BPKG_DIR="$(readlink -f "${BPKG_DIR}")"
+
 # Include config rc file if found
 CONFIG_FILE="$HOME/.bpkgrc"
 [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
@@ -31,29 +34,29 @@ usage () {
 
 ## format and output message
 message () {
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term color "${1}"
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" color "${1}"
   fi
 
   shift
   printf "    ${1}"
   shift
 
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term reset
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" reset
   fi
 
   printf ': '
 
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term reset
-    bpkg-term bright
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" reset
+    "${BPKG_DIR}/bpkg-term" bright
   fi
 
   printf "%s\n" "${@}"
 
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term reset
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" reset
   fi
 }
 
@@ -333,7 +336,7 @@ bpkg_install_from_remote () {
     ## get package name from 'package.json'
     name="$(
       echo -n "${json}" |
-      bpkg-json -b |
+      "${BPKG_DIR}/bpkg-json" -b |
       grep 'name' |
       awk '{ $1=""; print $0 }' |
       tr -d '\"' |
@@ -341,13 +344,13 @@ bpkg_install_from_remote () {
     )"
 
     ## check if forced global
-    if [[ "$(echo -n "${json}" | bpkg-json -b | grep '\["global"\]' | awk '{ print $2 }' | tr -d '"')" == 'true' ]]; then
+    if [[ "$(echo -n "${json}" | "${BPKG_DIR}/bpkg-json" -b | grep '\["global"\]' | awk '{ print $2 }' | tr -d '"')" == 'true' ]]; then
       needs_global=1
     fi
 
     ## construct scripts array
     {
-      scripts=$(echo -n "${json}" | bpkg-json -b | grep '\["scripts' | awk '{ print $2 }' | tr -d '"')
+      scripts=$(echo -n "${json}" | "${BPKG_DIR}/bpkg-json" -b | grep '\["scripts' | awk '{ print $2 }' | tr -d '"')
 
       ## create array by splitting on newline
       OLDIFS="${IFS}"
@@ -358,7 +361,7 @@ bpkg_install_from_remote () {
 
     ## construct files array
     {
-      files=$(echo -n "${json}" | bpkg-json -b | grep '\["files' | awk '{ print $2 }' | tr -d '"')
+      files=$(echo -n "${json}" | "${BPKG_DIR}/bpkg-json" -b | grep '\["files' | awk '{ print $2 }' | tr -d '"')
 
       ## create array by splitting on newline
       OLDIFS="${IFS}"
@@ -373,7 +376,7 @@ bpkg_install_from_remote () {
   if (( 1 == needs_global )); then
     if (( 1 == has_pkg_json )); then
       ## install bin if needed
-      build="$(echo -n "${json}" | bpkg-json -b | grep '\["install"\]' | awk '{$1=""; print $0 }' | tr -d '\"')"
+      build="$(echo -n "${json}" | "${BPKG_DIR}/bpkg-json" -b | grep '\["install"\]' | awk '{$1=""; print $0 }' | tr -d '\"')"
       build="$(echo -n "${build}" | sed -e 's/^ *//' -e 's/ *$//')"
     fi
 
@@ -416,7 +419,7 @@ bpkg_install_from_remote () {
 
     # install package dependencies
     info "Install dependencies for ${name}"
-    (cd "${cwd}/deps/${name}" && bpkg getdeps)
+    (cd "${cwd}/deps/${name}" && "${BPKG_DIR}/bpkg" getdeps)
 
     ## grab each script and place in deps directory
     for script in "${scripts[@]}"; do

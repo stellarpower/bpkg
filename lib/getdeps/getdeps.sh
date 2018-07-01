@@ -1,5 +1,8 @@
 #!/bin/bash
 
+[ -z "${BASH_SOURCE}" ] && BPKG_DIR="$(dirname "${0}")" || BPKG_DIR="$(dirname "${BASH_SOURCE}")"
+BPKG_DIR="$(readlink -f "${BPKG_DIR}")"
+
 ## output usage
 usage () {
   echo "Installs dependencies for a package."
@@ -26,14 +29,14 @@ bpkg_getdeps () {
     return 1
   fi
 
-  dependencies=$(cat "${pkg}" | bpkg-json -b | grep '\[\"dependencies' | sed "s/\[\"dependencies\",//" | sed "s/\"\]$(printf '\t')\"/@/" | tr -d '"')
+  dependencies=$(cat "${pkg}" | "${BPKG_DIR}/bpkg-json" -b | grep '\[\"dependencies' | sed "s/\[\"dependencies\",//" | sed "s/\"\]$(printf '\t')\"/@/" | tr -d '"')
   dependencies=($(echo ${dependencies[@]}))
 
   ## run bpkg install for each dependency
   for (( i = 0; i < ${#dependencies[@]} ; ++i )); do
     (
       local package=${dependencies[$i]}
-      bpkg install ${package}
+      "${BPKG_DIR}/bpkg" install ${package}
     )
   done
   return 0

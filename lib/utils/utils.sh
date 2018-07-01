@@ -1,5 +1,9 @@
 #!/bin/bash
 
+[ -z "${BASH_SOURCE}" ] && BPKG_DIR="$(dirname "${0}")" || BPKG_DIR="$(dirname "${BASH_SOURCE}")"
+BPKG_DIR="$(readlink -f "${BPKG_DIR}")"
+
+
 ## Collection of shared bpkg functions
 
 ## Init local config and set environmental defaults
@@ -31,29 +35,29 @@ bpkg_validate () {
 
 ## format and output message
 bpkg_message () {
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term color "${1}"
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" color "${1}"
   fi
 
   shift
   printf "    ${1}"
   shift
 
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term reset
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" reset
   fi
 
   printf ": "
 
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term reset
-    bpkg-term bright
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" reset
+    "${BPKG_DIR}/bpkg-term" bright
   fi
 
   printf "%s\n" "${@}"
 
-  if type -f bpkg-term > /dev/null 2>&1; then
-    bpkg-term reset
+  if type -f "${BPKG_DIR}/bpkg-term" > /dev/null 2>&1; then
+    "${BPKG_DIR}/bpkg-term" reset
   fi
 }
 

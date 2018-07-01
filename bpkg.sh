@@ -6,6 +6,9 @@ if [[ ${BASH_SOURCE[0]} != $0 ]]; then
   return 1
 fi
 
+BPKG_DIR="$(dirname "$0")"
+BPKG_DIR="$(readlink -f "${BPKG_DIR}")"
+
 ## bpkg version
 VERSION="0.3.0"
 
@@ -25,7 +28,8 @@ usage () {
 commands () {
   {
     declare -a local cmds=( $(
-      bpkg-suggest 'bpkg-' |
+      PATH="${PATH}:${BPKG_DIR}"
+      "${BPKG_DIR}/bpkg-suggest" 'bpkg-' |
       tail -n+2            |
       sed 's/.*\/bpkg-//g' |
       sort -u              |
@@ -41,9 +45,11 @@ features () {
   declare -a local features=(bpkg-json bpkg-suggest)
   for ((i = 0; i < ${#features[@]}; ++i)); do
     local f="${features[$i]}"
-    if ! type "${f}"  > /dev/null 2>&1; then
-      error "Missing "${f}" dependency"
-      return 1
+    if ! type "${f}" > /dev/null 2>&1; then
+      if ! type "${BPKG_DIR}/${f}" > /dev/null 2>&1; then
+        error "Missing "${f}" dependency"
+        return 1
+      fi
     fi
   done
 }
@@ -82,8 +88,8 @@ bpkg () {
         return 1
       fi
       cmd="bpkg-${arg}"
-      if type -f "${cmd}" > /dev/null 2>&1; then
-        "${cmd}" "${@}"
+      if type -f "${BPKG_DIR}/${cmd}" > /dev/null 2>&1; then
+        "${BPKG_DIR}/${cmd}" "${@}"
         return $?
       else
         echo >&2 "error: \`${arg}' is not a bpkg command."

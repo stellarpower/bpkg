@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+
+[ -z "${BASH_SOURCE}" ] && BPKG_DIR="$(dirname "${0}")" || BPKG_DIR="$(dirname "${BASH_SOURCE}")"
+BPKG_DIR="$(readlink -f "${BPKG_DIR}")"
+
+
 throw () {
   echo "$*" >&2
   exit 1
@@ -11,7 +16,7 @@ PRUNE=0
 
 usage() {
   echo
-  echo "Usage: JSON.sh [-b] [-l] [-p] [-h]"
+  echo "Usage: bpkg-json [-b] [-l] [-p] [-h]"
   echo
   echo "-p - Prune empty. Exclude fields with empty values."
   echo "-l - Leaf only. Only show leaf nodes, which stops data duplication."
